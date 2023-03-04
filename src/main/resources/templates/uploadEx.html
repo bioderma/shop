@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>파일 업로드 테스트</title>
+</head>
+<body>
+   <input name="uploadFile" type="file" multiple="multiple">
+   <button class = "uploadBtn">Upload</button>
+   
+   <!--  나중에 여러분이 이미지 업로드시 보여질 영역 -->
+   <div class = "uploadResult">
+      
+   </div>
+   <!-- JQUERY CDN 방식으로 Import -->
+   <script src="https://code.jquery.com/jquery-3.6.3.js" 
+   integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" 
+   crossorigin="anonymous">
+   </script>
+   
+   <script type="text/javascript">
+   /*
+      Jquery 에서 FormData 는 html 의 <form></form>을 객체화 한 것입니다.
+      저장되는 형식은 key/value 이고, 폼태그 처럼 데이터를 처리할 수 있게 해줍니다.
+      보낼때 내부적으로 XHR 에 실어서 보내는데, submit()가 같다라고 생각하세요.
+      참고로, 개발자 콘솔로 보시면 위 XHR 객체를 보실수 있을겁니다.
+      
+   */
+   
+   $(".uploadBtn").click(function(){
+      var formData = new FormData();
+      
+      var inputFile = $("input[type='file']");
+      var files = inputFile[0].files;
+      
+      for(var i = 0; i<files.length; i++){
+         console.log(files[i]);
+         
+         //위 formData 에 append()를 이용하면 선택된 파일정보가 저장됩니다.
+         formData.append("uploadFiles",files[i]);
+      }
+      
+
+      //ajax 객체를 이용해서 데이터를 서버에 전송합니다.
+      $.ajax({
+         url : 'uploadAjax',
+         processData : false, //processData 속성 : 일반적으로 우리가 말하는 쿼리스트링 이라고 생각하면 됩니다.
+         contentType : false,
+         data : formData,
+         type : 'POST',
+         dataType : 'json', //이건 내가 보내는 타입이 아니고, 내가 받을 타입을 말하는거임
+         success : function(result){ //result -> 메세지가 담길 변수
+            console.log(result);
+            
+            //이미지 보여주기는 좀 있다가..
+            showUploadImg(result);
+         
+         },
+         error : function(jqXHR, textStatus, errThrown){
+               console.log(errThrown);
+         }
+         
+      });//end of Ajax
+      
+   }); //uploadBtn 이벤트 끝
+   
+   
+   /*
+   이 함수는 이미지의 경로를 요청하고 리턴되는 JSON 데이터(파일의경로)를 받아서
+   이미지 표현을 하는 img 태그로 이미지를 보여주도록 정의 합니다.
+   이미지가 표현될 블락요소는 위에 선언한 이미지 표현 DIV 입니다.
+   */
+   function showUploadImg(arr){
+      console.log(arr);
+      
+      var divArea = $(".uploadResult");
+      
+      for(var i = 0; i<arr.length; i++){
+         //아래 따옴표 조심 하세요.
+         divArea.append("<img src='/display?fileName=" + arr[i].imageURL +"'>");
+      }
+      
+   }
+   
+   
+   </script>
+</body>
+</html>
